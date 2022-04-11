@@ -1,0 +1,36 @@
+{
+  "name": "@smpio/kube",
+  "version": "0.9.0",
+  "description": "Kubernetes utils",
+  "main": "out/index",
+  "types": "out/index",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smpio/kube.js.git"
+  },
+  "keywords": [
+    "Kubernetes"
+  ],
+  "author": "Dmitry Bashkatov <dbashkatov@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/smpio/kube.js/issues"
+  },
+  "homepage": "https://github.com/smpio/kube.js#readme",
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.6.1",
+    "@typescript-eslint/eslint-plugin": "^5.18.0",
+    "@typescript-eslint/parser": "^5.18.0",
+    "eslint": "^8.13.0",
+    "typescript": "^4.6.3"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.7",
+    "yaml": "^1.10.2"
+  }
+}
