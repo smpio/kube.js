@@ -187,6 +187,7 @@ export default class API {
     });
 
     if (!response.ok) {
+      console.error(method, uri, response.status);
       let err = await APIError.fromResponse(response);
       throw err;
     }
