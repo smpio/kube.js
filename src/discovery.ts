@@ -1,6 +1,6 @@
 import { Group, GroupVersion, Resource } from "./interfaces";
 
-type FetchFunction = (uri: string) => any;
+type FetchFunction = (uri: string) => Promise<any>;
 
 const coreRawGV = {
   groupVersion: 'v1',
@@ -38,7 +38,15 @@ async function discoverGroup(rawGroup: any, fetch: FetchFunction): Promise<Group
 
   let promises: Promise<GroupVersion>[] = rawGroup.versions.map(async (rawGV: any) => {
     let resourceListUri = rawGroup.name === '' ? 'api/' + rawGV.version : 'apis/' + rawGV.groupVersion;
-    let resources = parseResourceList(await fetch(resourceListUri));
+    let resources = parseResourceList(await fetch(resourceListUri).catch(err => {
+      console.error('Skipping', rawGV.groupVersion, 'due to', err.message);
+      return {
+        kind: 'APIResourceList',
+        apiVersion: rawGV.version,
+        groupVersion: rawGV.groupVersion,
+        resources: [],
+      };
+    }));
     let gv = {
       version: rawGV.version,
       resourcesByKind: mapByKind(resources),
