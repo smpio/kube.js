@@ -1,6 +1,6 @@
 {
   "name": "@smpio/kube",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "description": "Kubernetes utils",
   "main": "out/index",
   "types": "out/index",
