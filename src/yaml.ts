@@ -4,6 +4,13 @@ import * as YAML from 'yaml';
 // disable "folding" of block scalars, which replaces "|" with ">"
 YAML.scalarOptions.str.fold.lineWidth = 0;
 
+export interface YAMLOptions {
+  decodeSecrets: boolean;
+}
+
+const DEFAULT_OPTIONS = {
+  decodeSecrets: false
+};
 
 export function parse(str: string): any {
   let value = YAML.parse(str, {
@@ -17,9 +24,9 @@ export function parse(str: string): any {
   return value;
 }
 
-export function stringify(value: any): string {
+export function stringify(value: any, options: YAMLOptions = DEFAULT_OPTIONS): string {
   if (value.apiVersion === 'v1' && value.kind === 'Secret') {
-    value = deserializeSecret(value);
+    value = deserializeSecret(value, options);
   }
 
   return YAML.stringify(value, {
@@ -45,7 +52,7 @@ function serializeSecret(obj: any) {
   return obj;
 }
 
-function deserializeSecret(obj: any, {decodeSecrets = false}: {decodeSecrets: boolean} = {decodeSecrets: false}) {
+function deserializeSecret(obj: any, {decodeSecrets}: YAMLOptions) {
   if (decodeSecrets) {
     let data: any = {};
     let decoded: any = {};
