@@ -1,5 +1,7 @@
 import * as YAML from 'yaml';
 
+// see https://github.com/kubernetes/kubernetes/issues/34146#issuecomment-680825790
+
 
 // disable "folding" of block scalars, which replaces "|" with ">"
 YAML.scalarOptions.str.fold.lineWidth = 0;
