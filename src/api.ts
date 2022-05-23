@@ -5,6 +5,7 @@ import * as discovery from './discovery';
 import * as openapi from './openapi';
 import { Group, Resource, Object, Definition } from './interfaces';
 import { APIError } from './errors';
+import { log } from './log';
 
 export default class API {
   private _ready = false;
@@ -168,7 +169,7 @@ export default class API {
   }
 
   async request(method: string, uri: string, options: {accept: string, contentType?: string, body?: BodyInit}): Promise<Response> {
-    console.log(method, uri);
+    log(method, uri);
 
     let url = new URL(uri, this.apiURL);
     let headers: any = {

@@ -6,6 +6,7 @@ import fetch from 'node-fetch';
 import { promisify } from 'util';
 import { Agent, AgentOptions } from 'http';
 import { ChildProcess } from 'child_process';
+import { log } from './log';
 
 const exec = promisify(child_process.exec);
 const stat = promisify(fs.stat);
@@ -40,7 +41,7 @@ export async function startProxy(context?: string): Promise<ProxyWithOptionalCon
     cmd = ['kubectl', 'proxy', '--unix-socket', socketPath];
   }
   let disposed = false;
-  console.log(`Running ${cmd.join(' ')}`);
+  log(`Running ${cmd.join(' ')}`);
 
   unlinkSafe(socketPath);
   let child = await spawnReady(cmd, socketPath);
@@ -50,7 +51,7 @@ export async function startProxy(context?: string): Promise<ProxyWithOptionalCon
     if (disposed) {
       return;
     }
-    console.log(`Command ${cmd} exited with code ${code}, restarting`);
+    log(`Command ${cmd} exited with code ${code}, restarting`);
     unlinkSafe(socketPath);
     child = await spawnReady(cmd, socketPath);
     child.on('exit', handleExit);

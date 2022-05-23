@@ -5,3 +5,4 @@ export * from './interfaces';
 export { APIError } from './errors';
 export * as yaml from './yaml';
 export * from './proxy';
+export { logConfig } from './log';
