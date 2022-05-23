@@ -21,9 +21,24 @@ export interface Proxy {
   dispose: () => void;
 }
 
-export async function startProxy(context: string): Promise<Proxy> {
+export interface ProxyWithContext extends Proxy {
+  context: string;
+}
+
+interface ProxyWithOptionalContext extends Proxy {
+  context?: string;
+}
+
+export async function startProxy(): Promise<Proxy>;
+export async function startProxy(context: string): Promise<ProxyWithContext>;
+export async function startProxy(context?: string): Promise<ProxyWithOptionalContext> {
   let socketPath = path.join(os.tmpdir(), `kubectl-proxy-${process.pid}.sock`);
-  let cmd = ['kubectl', '--context', context, 'proxy', '--unix-socket', socketPath];
+  let cmd: string[];
+  if (context) {
+    cmd = ['kubectl', '--context', context, 'proxy', '--unix-socket', socketPath];
+  } else {
+    cmd = ['kubectl', 'proxy', '--unix-socket', socketPath];
+  }
   let disposed = false;
   console.log(`Running ${cmd.join(' ')}`);
 
