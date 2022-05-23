@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import * as os from 'os';
 import * as path from 'path';
 import * as child_process from 'child_process';
@@ -9,15 +9,12 @@ import { ChildProcess } from 'child_process';
 import { log } from './log';
 
 const exec = promisify(child_process.exec);
-const stat = promisify(fs.stat);
-const unlink = promisify(fs.unlink);
 const timeout = promisify(setTimeout);
 
 const SOCKET_CREATE_TIMEOUT = 10000;
 const API_READY_TIMEOUT = 10000;
 
 export interface Proxy {
-  context: string;
   socketPath: string;
   dispose: () => void;
 }
@@ -116,7 +113,7 @@ function spawnSocket(cmd: string[], socketPath: string): Promise<ChildProcess> {
       }
 
       try {
-        await stat(socketPath);
+        await fs.stat(socketPath);
       } catch(err) {
         setTimeout(checkSocket, 100);
       }
@@ -140,7 +137,7 @@ function spawnSocket(cmd: string[], socketPath: string): Promise<ChildProcess> {
 
 async function unlinkSafe(path: string) {
   try {
-    return await unlink(path);
+    return await fs.unlink(path);
   } catch(err: any) {
     if (err.code !== 'ENOENT') {
       throw err;
