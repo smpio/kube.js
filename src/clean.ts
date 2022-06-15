@@ -95,4 +95,6 @@ function cleanAnnotations(anns: any) {
 	delete anns['cni.projectcalico.org/podIP'];
 	delete anns['cni.projectcalico.org/podIPs'];
 	delete anns['kubernetes.io/psp'];
+	delete anns['kubectl.kubernetes.io/last-applied-configuration'];
+	delete anns['deployment.kubernetes.io/revision'];
 }
