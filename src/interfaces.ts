@@ -50,6 +50,7 @@ export interface PrimitiveDefinition extends DefinitionCommon {
 export interface ObjectDefinition extends DefinitionCommon {
   type: 'object';
   properties: {[name: string]: Definition};
+  required?: string[];
 }
 
 export interface ArrayDefinition extends DefinitionCommon {

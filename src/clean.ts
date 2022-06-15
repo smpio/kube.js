@@ -14,73 +14,60 @@ export default function cleanObject(obj: any, api: API) {
 }
 
 function clean(obj: any, def: Definition, api: API) {
-	if (def.type === 'ref') {
-		let typeRef = def.$ref;
+	if ('default' in def && deepEqual(obj, def.default)) {
+		throw DROP;
+	}
 
-		if (typeRef === 'io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta') {
-			if (obj.labels) {
+	if ('$ref' in def) {
+		let ref = def.$ref;
+		if (ref === 'io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta') {
+			if ('labels' in obj) {
 				cleanLabels(obj.labels);
 			}
-			if (obj.annotations) {
+			if ('annotations' in obj) {
 				cleanAnnotations(obj.annotations);
 			}
 		}
-
-		if (typeRef === 'io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector' && obj.matchLabels) {
-			cleanLabels(obj.matchLabels);
+		if (ref === 'io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector') {
+			if ('matchLabels' in obj) {
+				cleanLabels(obj.matchLabels);
+			}
 		}
-
 		def = api.definitions[def.$ref];
 		if (!def) {
 			return;
 		}
-	}
-
-	if (def.type !== 'object') {
-		return;
-	}
-
-	if ('default' in def && deepEqual(obj, def.default)) {
-		return DROP;
-	}
-
-	for (let [k, v] of Object.entries(obj)) {
-		let subdef = def.properties?.[k];
-		if (!subdef) {
-			continue;
+		if ('default' in def && deepEqual(obj, def.default)) {
+			throw DROP;
 		}
+	}
 
-		if (subdef.readOnly) {
-			delete obj[k];
-			continue;
+	if (obj instanceof Array && 'items' in def) {
+		for (let item of obj) {
+			clean(item, def.items, api);
 		}
+	}
 
-		if ('default' in subdef) {
-			if (typeof subdef.default === 'object') {
-				if (deepEqual(v, subdef.default)) {
-					delete obj[k];
-					continue;
-				}
-			}
-			else if (v === subdef.default) {
-				delete obj[k];
+	if (isMapping(obj) && 'properties' in def) {
+		for (let [k, v] of Object.entries(obj)) {
+			let subdef = def.properties[k];
+			if (!subdef) {
 				continue;
 			}
-		}
-
-		if (v instanceof Array && subdef.type === 'array') {
-			for (let item of v) {
-				clean(item, subdef.items, api);
+			try {
+				if (subdef.readOnly && k !== 'readOnly') {
+					throw DROP;
+				}
+				clean(v, subdef, api);
+				if (isMapping(v) && Object.keys(v).length === 0) {
+					throw DROP;
+				}
+			} catch (ex) {
+				if (ex === DROP) {
+					delete obj[k];
+				}
 			}
-		} else if (typeof v === 'object' && v) {
-			if (clean(v, subdef, api) === DROP) {
-				delete obj[k];
-			}
 		}
-	}
-
-	if (Object.entries(obj).length === 0) {
-		return DROP;
 	}
 }
 
@@ -97,4 +84,8 @@ function cleanAnnotations(anns: any) {
 	delete anns['kubernetes.io/psp'];
 	delete anns['kubectl.kubernetes.io/last-applied-configuration'];
 	delete anns['deployment.kubernetes.io/revision'];
+}
+
+function isMapping(v: any): v is {[k: string]: any} {
+	return typeof v === 'object' && !Array.isArray(v) && v !== null;
 }
