@@ -16,6 +16,7 @@ const coreRawGroup = {
 export async function discoverAllGroups(fetch: FetchFunction): Promise<{[groupName: string]: Group}> {
   let rawGroupList = await fetch('apis');
   rawGroupList.groups.push(coreRawGroup);
+  rawGroupList.groups = rawGroupList.groups.filter((rawGroup: any) => rawGroup.name !== 'extensions');
 
   let groups: {[groupName: string]: Group} = {};
   let promises = rawGroupList.groups.map((rawGroup: any) => discoverGroup(rawGroup, fetch).then(group => {
